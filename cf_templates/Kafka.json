@@ -1,0 +1,546 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Kafka cluster CloudFormation template file.",
+    "Mappings": {
+        "AWSInstanceType2Arch": {
+            "c1.medium": {
+                "Arch": "PV64"
+            },
+            "c1.xlarge": {
+                "Arch": "PV64"
+            },
+            "c3.2xlarge": {
+                "Arch": "HVM64"
+            },
+            "c3.4xlarge": {
+                "Arch": "HVM64"
+            },
+            "c3.8xlarge": {
+                "Arch": "HVM64"
+            },
+            "c3.large": {
+                "Arch": "HVM64"
+            },
+            "c3.xlarge": {
+                "Arch": "HVM64"
+            },
+            "c4.2xlarge": {
+                "Arch": "HVM64"
+            },
+            "c4.4xlarge": {
+                "Arch": "HVM64"
+            },
+            "c4.8xlarge": {
+                "Arch": "HVM64"
+            },
+            "c4.large": {
+                "Arch": "HVM64"
+            },
+            "c4.xlarge": {
+                "Arch": "HVM64"
+            },
+            "d2.xlarge": {
+                "Arch": "HVM64"
+            },
+            "g2.2xlarge": {
+                "Arch": "HVMG2"
+            },
+            "g2.8xlarge": {
+                "Arch": "HVMG2"
+            },
+            "i2.2xlarge": {
+                "Arch": "HVM64"
+            },
+            "i2.4xlarge": {
+                "Arch": "HVM64"
+            },
+            "i2.8xlarge": {
+                "Arch": "HVM64"
+            },
+            "i2.xlarge": {
+                "Arch": "HVM64"
+            },
+            "m3.2xlarge": {
+                "Arch": "HVM64"
+            },
+            "m3.large": {
+                "Arch": "HVM64"
+            },
+            "m3.medium": {
+                "Arch": "HVM64"
+            },
+            "m3.xlarge": {
+                "Arch": "HVM64"
+            },
+            "m4.10xlarge": {
+                "Arch": "HVM64"
+            },
+            "m4.2xlarge": {
+                "Arch": "HVM64"
+            },
+            "m4.4xlarge": {
+                "Arch": "HVM64"
+            },
+            "m4.large": {
+                "Arch": "HVM64"
+            },
+            "m4.xlarge": {
+                "Arch": "HVM64"
+            },
+            "r3.2xlarge": {
+                "Arch": "HVM64"
+            },
+            "r3.4xlarge": {
+                "Arch": "HVM64"
+            },
+            "r3.8xlarge": {
+                "Arch": "HVM64"
+            },
+            "r3.large": {
+                "Arch": "HVM64"
+            },
+            "r3.xlarge": {
+                "Arch": "HVM64"
+            }
+        },
+        "AWSRegionArch2AMI": {
+            "ap-northeast-1": {
+                "HVM64": "ami-374db956",
+                "HVMG2": "ami-e0ee1981",
+                "PV64": "ami-3e42b65f"
+            },
+            "ap-northeast-2": {
+                "HVM64": "ami-2b408b45",
+                "HVMG2": "NOT_SUPPORTED",
+                "PV64": "NOT_SUPPORTED"
+            },
+            "ap-south-1": {
+                "HVM64": "ami-ffbdd790",
+                "HVMG2": "ami-f5b2d89a",
+                "PV64": "NOT_SUPPORTED"
+            },
+            "ap-southeast-1": {
+                "HVM64": "ami-a59b49c6",
+                "HVMG2": "ami-0cb5676f",
+                "PV64": "ami-df9e4cbc"
+            },
+            "ap-southeast-2": {
+                "HVM64": "ami-dc361ebf",
+                "HVMG2": "ami-a71c34c4",
+                "PV64": "ami-63351d00"
+            },
+            "cn-north-1": {
+                "HVM64": "ami-8e6aa0e3",
+                "HVMG2": "NOT_SUPPORTED",
+                "PV64": "ami-77559f1a"
+            },
+            "eu-central-1": {
+                "HVM64": "ami-ea26ce85",
+                "HVMG2": "ami-7f04ec10",
+                "PV64": "ami-6527cf0a"
+            },
+            "eu-west-1": {
+                "HVM64": "ami-f9dd458a",
+                "HVMG2": "ami-b9bd25ca",
+                "PV64": "ami-4cdd453f"
+            },
+            "sa-east-1": {
+                "HVM64": "ami-6dd04501",
+                "HVMG2": "NOT_SUPPORTED",
+                "PV64": "ami-1ad34676"
+            },
+            "us-east-1": {
+                "HVM64": "ami-6869aa05",
+                "HVMG2": "ami-2e5e9c43",
+                "PV64": "ami-2a69aa47"
+            },
+            "us-west-1": {
+                "HVM64": "ami-31490d51",
+                "HVMG2": "ami-fd76329d",
+                "PV64": "ami-a2490dc2"
+            },
+            "us-west-2": {
+                "HVM64": "ami-7172b611",
+                "HVMG2": "ami-83b770e3",
+                "PV64": "ami-7f77b31f"
+            }
+        }
+    },
+    "Outputs": {
+        "PublicDNS": {
+            "Description": "Public DNS name to use for connection to the newly created Kafka cluster",
+            "Value": {
+                "Fn::GetAtt": [
+                    "KafkaNode",
+                    "PublicDnsName"
+                ]
+            }
+        },
+        "PublicIp": {
+            "Description": "Public IP address to use for connection to the newly created Kafka cluster",
+            "Value": {
+                "Fn::GetAtt": [
+                    "KafkaNode",
+                    "PublicIp"
+                ]
+            }
+        },
+        "PrivateIp": {
+            "Description": "Private IP address to use for connection to the newly created Kafka cluster",
+            "Value": {
+                "Fn::GetAtt": [
+                    "KafkaNode",
+                    "PrivateIp"
+                ]
+            }
+        }
+    },
+    "Parameters": {
+        "CIDRToWhitelist": {
+            "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+            "ConstraintDescription": "must be a valid CIDR range of the form x.x.x.x/x.",
+            "Default": "0.0.0.0/0",
+            "Description": "Internal VPC IP CIDR for internal communication for Kafka",
+            "MaxLength": "18",
+            "MinLength": "9",
+            "Type": "String"
+        },
+        "ClusterName": {
+            "Default": "Kafka Cluster",
+            "Description": "The name of this Kafka cluster",
+            "Type": "String"
+        },
+        "FleetSize": {
+            "Default": "2",
+            "Description": "Number of nodes in the cluster",
+            "MaxValue": "300",
+            "MinValue": "1",
+            "Type": "Number"
+        },
+        "InstanceType": {
+            "AllowedValues": [
+                "m3.medium",
+                "m3.large",
+                "m3.xlarge",
+                "m3.2xlarge",
+                "m4.large",
+                "m4.xlarge",
+                "m4.2xlarge",
+                "m4.4xlarge",
+                "m4.10xlarge",
+                "c3.large",
+                "c3.xlarge",
+                "c3.2xlarge",
+                "c3.4xlarge",
+                "c3.8xlarge",
+                "c4.large",
+                "c4.xlarge",
+                "c4.2xlarge",
+                "c4.4xlarge",
+                "c4.8xlarge",
+                "r3.large",
+                "r3.xlarge",
+                "r3.2xlarge",
+                "r3.4xlarge",
+                "r3.8xlarge",
+                "i2.xlarge",
+                "i2.2xlarge",
+                "i2.4xlarge",
+                "i2.8xlarge",
+                "d2.xlarge",
+                "d2.2xlarge",
+                "d2.4xlarge",
+                "d2.8xlarge"
+            ],
+            "ConstraintDescription": "must be a valid EC2 instance type.",
+            "Default": "m3.medium",
+            "Description": "EC2 instance type",
+            "Type": "String"
+        },
+        "KeyName": {
+            "ConstraintDescription": "must be the name of an existing EC2 KeyPair.",
+            "Default" : "TestKey",
+            "Description": "Name of an existing EC2 KeyPair to enable SSH access to the instances",
+            "Type": "AWS::EC2::KeyPair::KeyName"
+        }
+    },
+    "Resources": {
+        "KafkaNode": {
+            "Metadata": {
+                "AWS::CloudFormation::Init": {
+                    "configSets": {
+                        "install_Kafka": [
+                            "install_java8",
+                            "install_Kafka",
+                            "install_vim",
+                            "reload_bash"
+                        ]
+                    },
+                    "install_Kafka": {
+                        "commands": {
+                            "set_listeners" : {
+                                "command" : "sed -i -e \"s/^#listeners=PLAINTEXT:.*/listeners=PLAINTEXT:\\/\\/$(curl -s curl http://169.254.169.254/latest/meta-data/local-ipv4):9092/\" /etc/kafka/server.properties "
+                            },
+                            "set_zookeeper.connect" : {
+                                "command" : "sed -i -e \"s/^zookeeper.connect=.*/zookeeper.connect=$(curl -s curl http://169.254.169.254/latest/meta-data/local-ipv4):2181/\" /etc/kafka/server.properties "
+                            }
+                        },
+                        "packages": {
+                            "rpm" : {
+                                "epel" : "https://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-8.noarch.rpm"
+                            },
+                            "yum": {
+                                "confluent-platform-2.11": []
+                            }
+                        }
+                    },
+                    "install_java8": {
+                        "files": {
+                            "/etc/cfn/cfn-hup.conf": {
+                                "content": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "[main]\n",
+                                            "stack=",
+                                            {
+                                                "Ref": "AWS::StackId"
+                                            },
+                                            "\n",
+                                            "region=",
+                                            {
+                                                "Ref": "AWS::Region"
+                                            },
+                                            "\n"
+                                        ]
+                                    ]
+                                },
+                                "group": "root",
+                                "mode": "000400",
+                                "owner": "root"
+                            },
+                            "/etc/cfn/hooks.d/cfn-auto-reloader.conf": {
+                                "content": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "[cfn-auto-reloader-hook]\n",
+                                            "triggers=post.update\n",
+                                            "path=Resources.KafkaNode.Metadata.AWS::CloudFormation::Init\n",
+                                            "action=/opt/aws/bin/cfn-init -v ",
+                                            "         --stack ",
+                                            {
+                                                "Ref": "AWS::StackName"
+                                            },
+                                            "         --resource KafkaNode ",
+                                            "         --configsets install_Kafka ",
+                                            "         --region ",
+                                            {
+                                                "Ref": "AWS::Region"
+                                            },
+                                            "\n",
+                                            "runas=root\n"
+                                        ]
+                                    ]
+                                }
+                            },
+                            "/etc/yum.repos.d/confluent.repo": {
+                                "content": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "[Confluent.dist]\n",
+                                            "name = Confluent repository (dist)\n",
+                                            "baseurl = http://packages.confluent.io/rpm/3.0/7\n",
+                                            "gpgcheck = 1\n",
+                                            "gpgkey = http://packages.confluent.io/rpm/3.0/archive.key\n",
+                                            "enabled = 1\n",
+                                            "\n",
+                                            "[Confluent]\n",
+                                            "name = Confluent repository\n",
+                                            "baseurl = http://packages.confluent.io/rpm/3.0/\n",
+                                            "gpgcheck = 1\n",
+                                            "gpgkey = http://packages.confluent.io/rpm/3.0/archive.key\n",
+                                            "enabled = 1\n"
+                                        ]
+                                    ]
+                                }
+                            },
+                            "/sbin/kafkaStart": {
+                                "content": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "nohup zookeeper-server-start /etc/kafka/zookeeper.properties >/var/lib/kafka/zookeeper.debug.log & \n",
+                                            "sleep 2 \n",
+                                            "nohup kafka-server-start /etc/kafka/server.properties >/var/lib/kafka/kafka.debug.log & \n",
+                                            "sleep 20 \n",
+                                            "nohup kafka-rest-start >/var/lib/kafka/kafka-rest.log & \n",
+                                            "sleep 5 \n",
+                                            "nohup schema-registry-start /etc/schema-registry/schema-registry.properties >/var/lib/kafka/kafka-schema-registry.log & \n",
+                                            "sleep 1 \n"
+                                        ]
+                                    ]
+                                },
+                                "group": "root",
+                                "mode": "000755",
+                                "owner": "root"
+                            },
+                            "/sbin/kafkaStop": {
+                                "content": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "kafka-server-stop /etc/kafka/server.properties \n",
+                                            "sleep 5 \n",
+                                            "zookeeper-server-stop /etc/kafka/zookeeper.properties \n",
+                                            "sleep 5 \n",
+                                            "kafka-rest-stop \n",
+                                            "sleep 5 \n",
+                                            "schema-registry-stop /etc/schema-registry/schema-registry.properties \n"
+                                        ]
+                                    ]
+                                },
+                                "group": "root",
+                                "mode": "000755",
+                                "owner": "root"
+                            }
+                        },
+                        "packages": {                            
+                            "yum": {
+                                "java-1.8.0-openjdk-devel": []
+                            }
+                        },
+                        "services": {
+                            "sysvinit": {
+                                "cfn-hup": {
+                                    "enabled": "true",
+                                    "ensureRunning": "true",
+                                    "files": [
+                                        "/etc/cfn/cfn-hup.conf",
+                                        "/etc/cfn/hooks.d/cfn-auto-reloader.conf"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "install_vim" : {
+                        "packages": {
+                            "yum": {
+                                "vim-enhanced": []
+                            }
+                        },
+                        "commands" : {
+                            "set_alias" : {
+                                "command" : "echo 'alias vi=vim' | tee -a /etc/bashrc"
+                            }
+                        }
+                    },
+                    "reload_bash" : {
+                        "commands" : {
+                            "reload_bash" : {
+                                "command" : "source /home/ec2-user/.bash_profile"
+                            }
+                        }
+                    }
+                }
+            },
+            "Properties": {
+                "DisableApiTermination": false,
+                "ImageId": "ami-39ac915a",
+                "InstanceType": {
+                    "Ref": "InstanceType"
+                },
+                "KeyName": {
+                    "Ref": "KeyName"
+                },
+                "SecurityGroups": [
+                    {
+                        "Ref": "KafkaSecurityGroup"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Ref": "ClusterName"
+                        }
+                    }
+                ],
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#!/bin/bash -v\n",
+
+                                "### This is redhat 7. It supports cloud-init but Cfn packages need to be installed unlike AWS Linux. And they are installed in a different location\n",
+                                "# First enable EPEL\n",
+                                "rpm -Uvh https://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-8.noarch.rpm", "\n",
+                                "# Now install Python Setuptools(easy_install) and Pip", "\n",
+                                "yum -y install python-pip", "\n",
+                                "# Now install cfn scripts", "\n",
+                                "/usr/bin/easy_install --script-dir /opt/aws/bin https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz", "\n",
+                                "# Now fix the cfn-hup script and copy to init.d location as AWS does not do it for you", "\n",
+                                "cp -f `pip show aws-cfn-bootstrap 2> /dev/null | egrep  \"^Location\" | awk -F \":\" ' { print $2 }'`/init/redhat/cfn-hup /etc/init.d/", "\n",
+                                "chmod 755 /etc/init.d/cfn-hup", "\n",
+                                "chkconfig --add cfn-hup", "\n",
+                                
+                                "mkdir /var/lib/kafka \n",
+
+                                "echo \"",
+                                {
+                                    "Ref": "ClusterName"
+                                },
+                                "\" > /tmp/clustername.data \n",
+                                "# Install the files and packages from the metadata\n",
+                                "/opt/aws/bin/cfn-init -v ",
+                                "         --stack ",
+                                {
+                                    "Ref": "AWS::StackName"
+                                },
+                                "         --resource KafkaNode ",
+                                "         --configsets install_Kafka ",
+                                "         --region ",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                "\n",
+                                "# All is well so signal success\n",
+                                "  /opt/aws/bin/cfn-signal -e 0 --reason=\"Server setup complete\"",
+                                "         --stack ", { "Ref": "AWS::StackName" },
+                                "         --resource KafkaNode ",
+                                "         --region ", { "Ref": "AWS::Region" },
+                                "\n",
+                                "/sbin/kafkaStart \n"
+                            ]
+                        ]
+                    }
+                }
+            },
+            "Type": "AWS::EC2::Instance",
+            "CreationPolicy" : {
+                "ResourceSignal" : {
+                  "Timeout" : "PT10M"
+                }
+            }
+        },
+        
+        "KafkaSecurityGroup": {
+            "Properties": {
+                "GroupDescription": "SSH access",
+                "SecurityGroupIngress": [
+                    {
+                        "CidrIp": {
+                            "Ref": "CIDRToWhitelist"
+                        },
+                        "FromPort": "22",
+                        "IpProtocol": "tcp",
+                        "ToPort": "22"
+                    }
+                ]
+            },
+            "Type": "AWS::EC2::SecurityGroup"
+        }
+    }
+}
