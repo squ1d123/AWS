@@ -1,0 +1,69 @@
+---
+driver:
+  name: ec2
+  aws_ssh_key_id: TestKey
+  security_group_ids: ["sg-fcb6549b"]
+  region: ap-southeast-2
+  #availability_zone: a
+  require_chef_omnibus: true
+  subnet_id: subnet-ec1bb69a
+  #iam_profile_name:
+  instance_type: m3.medium
+  associate_public_ip: false
+  interface: private 
+
+transport:
+  ssh_key: ~/.ssh/TestKey.pem
+  connection_timeout: 10
+  connection_retries: 5
+  username: Chef
+verifier:
+  root_path: '/tmp/vagrant-cache/busser'
+provisioner:
+  name: 'chef_solo'
+
+platforms:
+    - name: Linux_Krishna
+      driver:
+        image_id: ami-39ac915a
+        tags:
+          Name: kafka-chef
+
+      transport:
+        username: ec2-user
+
+suites:
+  - name: default
+    run_list:
+      # We only include apt because of an issue installing java where ubuntu
+      # requires an apt-get update in order to successfully run
+      - recipe[apt]
+      - recipe[confluent_tester]
+      - recipe[confluent::kafka]
+      - recipe[confluent::kafka-rest]
+      - recipe[confluent::schema-registry]
+    attributes:
+      confluent:
+        version: 3.1.1
+        scala_version: 2.11 
+        kafka:
+          brokers:
+            - default-ubuntu-1404
+          zookeepers:
+            - localhost:2181
+          server.properties:
+            log.dirs: /tmp/kafka-logs
+            broker.id: 1
+        kafka-rest:
+          kafka-rest.properties:
+            zookeeper.connect: localhost:2181
+            bootstrap.servers: localhost:9092
+        schema-registry:
+          schema-registry.properties:
+            kafkastore.connection.url: localhost:2181
+      java:
+        install_flavor: oracle
+        jdk_version: 8
+        set_default: true
+        oracle:
+          accept_oracle_download_terms: true
