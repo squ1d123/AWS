@@ -1,0 +1,55 @@
+---
+driver:
+  name: ec2
+  aws_ssh_key_id: TestKey
+  security_group_ids: ["sg-856486e2"]
+  region: ap-southeast-2
+  availability_zone: a
+  require_chef_omnibus: true
+  subnet_id: subnet-ec1bb69a
+  instance_type: m3.medium
+  associate_public_ip: false
+  interface: private
+
+transport:
+  ssh_key: ~/.ssh/TestKey.pem
+  connection_timeout: 10
+  connection_retries: 5
+  username: root
+
+provisioner:
+  name: chef_zero
+  # You may wish to disable always updating cookbooks in CI or other testing environments.
+  # For example:
+  #   always_update_cookbooks: <%= !ENV['CI'] %>
+  always_update_cookbooks: true
+  attributes:
+    java:
+      jdk_version: 8
+
+verifier:
+  name: inspec
+
+platforms:
+  - name: REHL72_Cassandra
+    driver:
+      image_id: ami-39ac915a
+      tags:
+        Name: cassandra-kitchen
+
+    transport:
+      username: root
+
+suites:
+  - name: default
+    run_list:
+      - recipe[cassandra::default]
+    verifier:
+      inspec_tests:
+        - test/recipes
+    attributes:
+      java:
+        jdk_version: 8
+      cassandra:
+        config:
+          cluster_name: "kitchen test"
