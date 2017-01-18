@@ -9,7 +9,7 @@ default["confluent"]["install_dir"] = "/opt/confluent"
 default["confluent"]["user"] = "confluent"
 default["confluent"]["group"] = "confluent"
 
-default["confluent"]["kafka"]["server.properties"] = {'auto.create.topics.enable'=> 'true', 'hostname' => node['ipaddress]}
+default["confluent"]["kafka"]["server.properties"] = {'auto.create.topics.enable'=> 'true', 'host.name' => node['ipaddress']}
 default['confluent']['kafka']['zookeepers'] = nil
 default['confluent']['kafka']['brokers'] = nil
 default["confluent"]["kafka"]["env_vars"] = {}
